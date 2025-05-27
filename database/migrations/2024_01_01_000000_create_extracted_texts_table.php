@@ -14,7 +14,9 @@ return new class extends Migration
             $table->unsignedBigInteger('model_id');
             $table->string('field_name')->nullable();
             $table->text('text_key');
-            $table->text('text_value');
+            $table->text('text_value'); // Deprecated, kept for backward compatibility
+            $table->text('original_value')->nullable();
+            $table->text('translated_value')->nullable();
             $table->string('locale', 5)->default('en');
             $table->boolean('is_translated')->default(false);
             $table->timestamp('last_extracted_at')->nullable();

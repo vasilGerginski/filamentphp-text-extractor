@@ -7,6 +7,11 @@ return [
     'queue_extraction' => env('QUEUE_TEXT_EXTRACTION', false),
     'queue_name' => env('TEXT_EXTRACTION_QUEUE', 'default'),
     
+    // Language file generation
+    'auto_generate_lang_files' => env('AUTO_GENERATE_LANG_FILES', true),
+    'lang_file_pattern' => '{model_name}.php', // e.g., blog_posts.php
+    'locales' => ['en', 'es', 'fr', 'de'], // Available locales
+    
     // Special field handlers
     'field_handlers' => [
         'slug' => \VasilGerginski\FilamentTextExtractor\FieldHandlers\SlugHandler::class,

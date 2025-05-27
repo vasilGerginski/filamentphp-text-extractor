@@ -4,10 +4,11 @@ namespace VasilGerginski\FilamentTextExtractor\Commands;
 
 use Illuminate\Console\Command;
 use VasilGerginski\FilamentTextExtractor\Services\TextExtractionService;
+use VasilGerginski\FilamentTextExtractor\Services\LangFileGenerator;
 
 class ExtractTranslatableTextCommand extends Command
 {
-    protected $signature = 'text:extract {model?} {--id=}';
+    protected $signature = 'text-extractor:extract {model?} {--id=} {--generate-lang-files : Generate language files after extraction}';
     
     protected $description = 'Extract translatable text from models';
 
@@ -54,6 +55,24 @@ class ExtractTranslatableTextCommand extends Command
             $this->info('Extracting text from all models with ExtractsTranslatableText trait...');
             $service->extractAllModels();
             $this->info('Text extraction completed!');
+        }
+
+        // Generate language files if requested
+        if ($this->option('generate-lang-files')) {
+            $this->info('Generating language files...');
+            $generator = new LangFileGenerator();
+            
+            if ($modelClass) {
+                $generator->generateForModel($modelClass);
+            } else {
+                // Generate for all models
+                $models = \VasilGerginski\FilamentTextExtractor\Models\ExtractedText::distinct('model_type')->pluck('model_type');
+                foreach ($models as $model) {
+                    $generator->generateForModel($model);
+                }
+            }
+            
+            $this->info('Language files generated successfully!');
         }
 
         return 0;

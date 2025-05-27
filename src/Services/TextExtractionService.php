@@ -7,17 +7,20 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use VasilGerginski\FilamentTextExtractor\Models\ExtractedText;
 use VasilGerginski\FilamentTextExtractor\Traits\ExtractsTranslatableText;
+use VasilGerginski\FilamentTextExtractor\Services\LangFileGenerator;
 
 class TextExtractionService
 {
     protected array $extractedTexts = [];
     protected string $defaultLocale;
     protected array $fieldHandlers = [];
+    protected LangFileGenerator $langFileGenerator;
 
     public function __construct()
     {
         $this->defaultLocale = config('filament-text-extractor.default_locale', 'en');
         $this->loadFieldHandlers();
+        $this->langFileGenerator = new LangFileGenerator();
     }
 
     protected function loadFieldHandlers(): void
@@ -236,14 +239,15 @@ class TextExtractionService
                 'text_key' => $key,
                 'locale' => $this->defaultLocale,
             ], [
-                'text_value' => $data['value'],
+                'text_value' => $data['value'], // Kept for backward compatibility
+                'original_value' => $data['value'],
                 'field_name' => $data['field'],
                 'last_extracted_at' => now(),
             ]);
         }
 
-        // Also save to traditional lang files
-        $this->saveToLanguageFile($model);
+        // Generate language files using the new generator
+        $this->langFileGenerator->generateForModel(get_class($model), $this->defaultLocale);
     }
 
     protected function saveToLanguageFile(Model $model): void

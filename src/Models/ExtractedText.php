@@ -15,6 +15,8 @@ class ExtractedText extends Model
         'field_name',
         'text_key',
         'text_value',
+        'original_value',
+        'translated_value',
         'locale',
         'is_translated',
         'last_extracted_at',
