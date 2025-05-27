@@ -33,10 +33,23 @@ Install the package via Composer:
 composer require vasilgerginski/filamentphp-text-extractor
 ```
 
+Register the plugin in your Panel provider (e.g., `app/Providers/Filament/AdminPanelProvider.php`):
+
+```php
+use VasilGerginski\FilamentTextExtractor\FilamentTextExtractorPlugin;
+
+public function panel(Panel $panel): Panel
+{
+    return $panel
+        // ... other configuration
+        ->plugin(FilamentTextExtractorPlugin::make());
+}
+```
+
 Publish and run the migrations:
 
 ```bash
-php artisan vendor:publish --tag="filament-text-extractor-migrations"
+php artisan vendor:publish --provider="VasilGerginski\FilamentTextExtractor\FilamentTextExtractorServiceProvider"
 php artisan migrate
 ```
 
