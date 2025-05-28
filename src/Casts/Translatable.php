@@ -19,39 +19,42 @@ class Translatable implements CastsAttributes
      */
     public function get(Model $model, string $key, mixed $value, array $attributes): mixed
     {
-        if (!$value) {
+        if (empty($value)) {
             return $value;
         }
 
-        // Generate translation key
+        // Get the model name for the translation file (e.g., "blog_post")
         $modelName = class_basename($model);
-        $modelKey = Str::snake($modelName);
-        $translationKey = "{$modelKey}_{$model->id}_{$key}";
+        $fileName = Str::snake($modelName);
         
-        // Get the lang file name
-        $fileName = Str::snake(Str::plural($modelName));
+        // Use the actual text value as the translation key
+        $translationKey = $value;
         
-        // Try to get translation
+        // Try to get translation using the simple key approach: blog_post.{text_value}
         $translated = __("{$fileName}.{$translationKey}");
         
-        // If translation exists (not the same as the key), return it
+        // If translation found (not the key itself), return it
         if ($translated !== "{$fileName}.{$translationKey}") {
             return $translated;
         }
         
-        // Otherwise, check if we have a translated value in the database
-        $extractedText = \VasilGerginski\FilamentTextExtractor\Models\ExtractedText::where([
-            'model_type' => get_class($model),
-            'model_id' => $model->id,
-            'field_name' => $key,
-            'locale' => app()->getLocale(),
-        ])->first();
-        
-        if ($extractedText && $extractedText->translated_value) {
-            return $extractedText->translated_value;
+        // If no translation found, try to get from extracted_texts table
+        try {
+            $extractedText = \VasilGerginski\FilamentTextExtractor\Models\ExtractedText::where([
+                'model_type' => get_class($model),
+                'model_id' => $model->getKey(),
+                'text_value' => $value,
+                'locale' => app()->getLocale(),
+            ])->first();
+            
+            if ($extractedText && !empty($extractedText->translated_value)) {
+                return $extractedText->translated_value;
+            }
+        } catch (\Exception $e) {
+            // If database query fails, just return original value
         }
         
-        // Fall back to original value
+        // Return original value as fallback
         return $value;
     }
 
