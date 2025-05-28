@@ -8,16 +8,36 @@ A powerful Laravel package that seamlessly integrates with Filament Admin Panel 
 
 ## 🚀 Features
 
-- **🔍 Automatic Text Extraction**: Extract translatable fields from any Eloquent model with a simple trait
-- **🎨 Filament Integration**: Beautiful admin interface built with Filament for managing extracted texts
-- **📝 Rich Text Support**: Extracts text from HTML, Markdown, and rich text editor content
-- **🏗️ Filament Builder Support**: Automatically extracts text from Filament Builder JSON blocks
-- **🌍 Multi-locale Support**: Built-in support for multiple languages and locales
-- **📊 Extraction Dashboard**: Analytics and overview of all extracted texts
-- **⚡ Queue Support**: Handle bulk text extraction asynchronously for better performance
-- **🔧 Flexible Field Handlers**: Specialized handlers for different field types (email, URL, rich text, etc.)
-- **🧪 Well Tested**: Comprehensive test suite included
-- **📦 Easy Installation**: Simple setup with minimal configuration
+### 🔍 **Automatic Text Extraction**
+- Extract translatable fields from any Eloquent model with a simple trait
+- **Auto-generate Laravel translation files** in standard format (`lang/en/model_name.php`)
+- Support for simple text fields, JSON structures, and rich content
+
+### ✨ **Translation Casts (NEW!)**
+- **Translatable Cast**: Use `{{ $post->title }}` instead of `{{ __('blog_post.' . $post->title) }}`
+- **JsonTranslatable Cast**: Automatic translation for JSON UI components (hero sections, feature grids, etc.)
+- **Zero code changes** required in your templates!
+
+### 🎨 **Filament Integration**
+- Beautiful admin interface built with Filament for managing extracted texts
+- **Filament Plugin Architecture**: Automatically registers with your admin panel
+- Built-in resource for managing translations
+
+### 🏗️ **Advanced Content Support**
+- **Rich Text Support**: Extracts text from HTML, Markdown, and rich text editor content
+- **JSON Field Translation**: Perfect for page builders, CMS blocks, and UI components
+- **Nested Structure Support**: Works recursively through complex JSON data
+
+### 🌍 **Multi-Language Ready**
+- Built-in support for multiple languages and locales
+- **Laravel Standard**: Uses Laravel's translation system (`__()`  helper)
+- **Smart Fallbacks**: Returns original text if no translation found
+
+### ⚡ **Performance & Developer Experience**
+- Queue Support: Handle bulk text extraction asynchronously
+- **Live Demos**: Comprehensive examples showing all features
+- Well Tested: Comprehensive test suite included
+- Easy Installation: Simple setup with minimal configuration
 
 ## 📋 Requirements
 
@@ -118,6 +138,106 @@ php artisan text-extractor:extract "App\Models\BlogPost"
 
 # Extract with specific options
 php artisan text-extractor:extract "App\Models\BlogPost" --queue
+```
+
+## ✨ Translation Casts (NEW!)
+
+### 🎯 Translatable Cast for Simple Fields
+
+Instead of manual translation calls, use the `Translatable` cast for automatic translation:
+
+```php
+use VasilGerginski\FilamentTextExtractor\Casts\Translatable;
+
+class BlogPost extends Model
+{
+    use ExtractsTranslatableText;
+    
+    protected $casts = [
+        'title' => Translatable::class,
+        'excerpt' => Translatable::class,
+        'meta_description' => Translatable::class,
+    ];
+}
+```
+
+**Usage in templates:**
+```blade
+{{-- OLD WAY (manual) --}}
+{{ __('blog_post.' . $post->title) }}
+
+{{-- NEW WAY (automatic!) --}}
+{{ $post->title }}                    {{-- Automatically translated! --}}
+{{ $post->excerpt }}                  {{-- Automatically translated! --}}
+```
+
+### 🏗️ JsonTranslatable Cast for UI Components
+
+Perfect for page builders, CMS content blocks, and JSON-based UI components:
+
+```php
+use VasilGerginski\FilamentTextExtractor\Casts\JsonTranslatable;
+
+class BlogPost extends Model
+{
+    protected $casts = [
+        'content' => JsonTranslatable::class,    // For page builder blocks
+        'metadata' => JsonTranslatable::class,   // For component data
+    ];
+}
+```
+
+**JSON Structure (stored in database):**
+```json
+{
+  "type": "hero",
+  "title": "Welcome to Our Platform",
+  "subtitle": "Build amazing applications with our tools",
+  "button_text": "Get Started Now",
+  "background_image": "/images/hero-bg.jpg"
+}
+```
+
+**Template Usage (no translation calls needed!):**
+```blade
+<div class="hero">
+    <h1>{{ $post->content[0]['title'] }}</h1>          {{-- Auto-translated! --}}
+    <p>{{ $post->content[0]['subtitle'] }}</p>         {{-- Auto-translated! --}}
+    <button>{{ $post->content[0]['button_text'] }}</button> {{-- Auto-translated! --}}
+</div>
+```
+
+**Translation Results:**
+- **English:** "Welcome to Our Platform"
+- **Spanish:** "Bienvenido a Nuestra Plataforma" *(automatic!)*
+
+### 🧠 Smart Field Detection
+
+The `JsonTranslatable` cast automatically detects and translates:
+- ✅ **UI Text:** `title`, `subtitle`, `heading`, `description`, `label`, `button_text`
+- ❌ **Technical Data:** `type`, `icon`, `url`, `id`, `background_image` *(ignored)*
+
+## 🎭 Live Demos & Examples
+
+Check out the [`examples/`](examples/) directory for comprehensive demos:
+
+- **🌍 Translation Demo:** Classic `__()` approach
+- **✨ Cast Demo:** Automatic `{{ $property }}` translation  
+- **🏗️ JSON Demo:** UI component translation with JsonTranslatable cast
+- **📊 CLI Demo:** Command-line testing and statistics
+
+**Quick demo setup:**
+```bash
+# Copy demo files to your Laravel project
+cp -r vendor/vasilgerginski/filamentphp-text-extractor/examples/* resources/views/
+
+# Add routes (see examples/routes.php)
+# Create sample data (see examples/sample-data.php)
+
+# Visit your demos:
+# /translation-demo
+# /cast-demo  
+# /json-demo
 ```
 
 ## 📄 Advanced Features
